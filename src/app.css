@@ -1,0 +1,33 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+html {
+  background: #f8f9f5;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  min-height: 100dvh;
+  overflow-x: hidden;
+  background: #f8f9f5;
+  color: #223c35;
+  font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input {
+  font: inherit;
+}
