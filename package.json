@@ -3,6 +3,7 @@
   "version": "0.2.0",
   "private": true,
   "type": "module",
+  "packageManager": "pnpm@11.25.0",
   "engines": { "node": ">=22.13.0" },
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 3014 --strictPort",
@@ -12,8 +13,8 @@
     "worker:dev": "wrangler dev --ip 127.0.0.1 --port 8788",
     "db:local": "wrangler d1 migrations apply DB --local",
     "db:remote": "wrangler d1 migrations apply DB --remote",
-    "deploy:check": "npm run build && wrangler deploy --dry-run",
-    "deploy": "npm run build && wrangler deploy"
+    "deploy:check": "pnpm build && wrangler deploy --dry-run",
+    "deploy": "node scripts/release-check.mjs && pnpm build && wrangler deploy"
   },
   "dependencies": {
     "@capacitor/browser": "8.0.4",
