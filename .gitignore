@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.wrangler/
+.dev.vars
+.dev.vars.*
+.env
+.env.*
+!.env.example
+*.log
+*.pem
+*.key
+*.keystore
+*.jks
+coverage/
+reports/
+release-package/
+*.zip

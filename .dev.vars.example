@@ -1,0 +1,4 @@
+# Copy to .dev.vars locally. Never commit actual credentials.
+GOOGLE_CLIENT_ID=""
+GOOGLE_CLIENT_SECRET=""
+# Production APP_ORIGIN is a non-secret configured in wrangler.jsonc.
