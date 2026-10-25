@@ -10,6 +10,13 @@ type Session = { authenticated: boolean; user: User | null; csrfToken: string; c
 type Screen = { kind: "loading" } | { kind: "error"; message: string } | { kind: "login"; session: Session } | { kind: "app"; session: Session; storage: AccountStorage };
 const lessons = content.lessons as Lesson[];
 
+export function getAuthNotice(search: string) {
+  const params = new URLSearchParams(search);
+  if (params.get("auth") === "cancelled") return { role: "status" as const, text: "Googleログインをキャンセルしました。準備ができたら、もう一度ログインできます。" };
+  if (params.get("auth") === "failed" || params.has("error")) return { role: "alert" as const, text: "Googleログインが完了しませんでした。もう一度お試しください。" };
+  return null;
+}
+
 function FullSkeleton() {
   return <main className="auth-skeleton" aria-busy="true" aria-label="読み込み中"><div className="skeleton-bar"/><div className="skeleton-layout"><div className="skeleton-nav"/><div className="skeleton-content"><div className="skeleton-title"/><div className="skeleton-card"/><div className="skeleton-row"><i/><i/><i/></div><div className="skeleton-card short"/></div></div><span className="sr-only">読み込み中</span></main>;
 }
@@ -116,8 +123,8 @@ export function AuthApp() {
   if (screen.kind === "error") return <main className="auth-page"><section className="auth-card"><p className="auth-wordmark">LUMINA</p><h1>読み込みできませんでした</h1><p role="alert">{screen.message}</p><button className="google-button" onClick={() => setAttempt((value) => value + 1)}>もう一度読み込む</button></section></main>;
   if (screen.kind === "login") {
     const configured = screen.session.configuration.google && screen.session.configuration.database;
-    const oauthError = new URLSearchParams(location.search).get("error");
-    return <main className="auth-page"><div className="auth-halo" aria-hidden="true"/><section className="auth-card"><div className="auth-symbol" aria-hidden="true">✦</div><p className="auth-wordmark">LUMINA</p><h1>介護福祉士 学習アプリ</h1>{oauthError && <p className="auth-error" role="alert">Googleログインが完了しませんでした。もう一度お試しください。</p>}{configured ? <a className="google-button" href="/api/auth/google/start?returnTo=%2Flumina%2F"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.6 12.2c0-.7-.1-1.4-.2-2.1H12v4h5.4a4.7 4.7 0 0 1-2 3.1v2.6h3.3c1.9-1.8 2.9-4.3 2.9-7.6ZM12 22c2.7 0 5-.9 6.7-2.4l-3.3-2.6c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.1H3v2.6A10 10 0 0 0 12 22ZM6.4 13.9a6 6 0 0 1 0-3.8V7.5H3a10 10 0 0 0 0 9l3.4-2.6ZM12 6c1.5 0 2.8.5 3.8 1.5l2.9-2.8A9.6 9.6 0 0 0 12 2 10 10 0 0 0 3 7.5l3.4 2.6A6 6 0 0 1 12 6Z"/></svg>Googleでログイン</a> : <div className="auth-configuration" role="status"><strong>公開準備中</strong><p>{!screen.session.configuration.google && "Google認証が未設定です。"}{!screen.session.configuration.database && "Cloudflare D1 が未設定です。"}</p><button onClick={() => setAttempt((value) => value + 1)}>設定を再確認</button></div>}<p className="auth-privacy">学習進捗・装備・学習記録をアカウントに保存します。</p><nav className="auth-links" aria-label="利用案内"><a href="/privacy/">プライバシーポリシー</a><a href="/terms/">利用規約</a></nav></section></main>;
+    const notice = getAuthNotice(location.search);
+    return <main className="auth-page"><div className="auth-halo" aria-hidden="true"/><section className="auth-card"><div className="auth-symbol" aria-hidden="true">✦</div><p className="auth-wordmark">LUMINA</p><h1>介護福祉士 学習アプリ</h1>{notice && <p className={notice.role === "alert" ? "auth-error" : "auth-privacy"} role={notice.role}>{notice.text}</p>}{configured ? <a className="google-button" href="/api/auth/google/start?returnTo=%2Flumina%2F"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M21.6 12.2c0-.7-.1-1.4-.2-2.1H12v4h5.4a4.7 4.7 0 0 1-2 3.1v2.6h3.3c1.9-1.8 2.9-4.3 2.9-7.6ZM12 22c2.7 0 5-.9 6.7-2.4l-3.3-2.6c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.6-4.1H3v2.6A10 10 0 0 0 12 22ZM6.4 13.9a6 6 0 0 1 0-3.8V7.5H3a10 10 0 0 0 0 9l3.4-2.6ZM12 6c1.5 0 2.8.5 3.8 1.5l2.9-2.8A9.6 9.6 0 0 0 12 2 10 10 0 0 0 3 7.5l3.4 2.6A6 6 0 0 1 12 6Z"/></svg>Googleでログイン</a> : <div className="auth-configuration" role="status"><strong>公開準備中</strong><p>{!screen.session.configuration.google && "Google認証が未設定です。"}{!screen.session.configuration.database && "Cloudflare D1 が未設定です。"}</p><button onClick={() => setAttempt((value) => value + 1)}>設定を再確認</button></div>}<p className="auth-privacy">学習進捗・装備・学習記録をアカウントに保存します。</p><nav className="auth-links" aria-label="利用案内"><a href="/privacy/">プライバシーポリシー</a><a href="/terms/">利用規約</a></nav></section></main>;
   }
   return <><AccountPanel session={screen.session} storage={screen.storage} onBlockChange={setGameBlocked} onExit={() => { setAccountStorage(null); setAttempt((value) => value + 1); }}/><div className="authenticated-game" inert={gameBlocked}><MinuteJourney/></div></>;
 }
